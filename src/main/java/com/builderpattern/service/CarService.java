@@ -15,4 +15,8 @@ public interface CarService {
     Car getById(Long carId);
 
     Car insert(Car car);
+
+    Car activate(Long carId);
+
+    Car deactivate(Long carId);
 }

@@ -4,31 +4,128 @@ import com.builderpattern.applicationContext.ApplicationContext;
 import com.builderpattern.builder.CarBuilder;
 import com.builderpattern.builder.CarBuilderImpl;
 import com.builderpattern.exception.BusinessException;
+import com.builderpattern.exception.CarNotFoundException;
 import com.builderpattern.model.Car;
 import com.builderpattern.model.CarType;
 import com.builderpattern.model.Pessoa;
+import com.builderpattern.service.CarService;
 
 import java.time.Year;
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         ApplicationContext applicationContext = new ApplicationContext();
+        CarService carService = applicationContext.getCarService();
 
-        CarBuilder carBuilder = new CarBuilderImpl();
+        Scanner sc = new Scanner(System.in);
+        boolean keepLooping = true;
+        int menuOption;
 
-        Car car1 = exemploSemBuilderComTodosOsParametros();
-        Car car2 = exemploSemBuilderComParametrosNecessarios();
-        Car car3 = exemploComBuilderComTodosParametros();
-        Car car4 = exemploComBuilderComParametrosNecessarios();
-        Pessoa pessoa = exemploLombok();
+        while (keepLooping) {
+            printMenu();
+            menuOption = sc.nextInt();
 
+            switch (menuOption) {
+                case 1 -> adicionarCarro(carService, sc);
+                case 2 -> procurarCarroPorId(carService, sc);
+                case 3 -> mostrarTodosCarros(carService);
+                case 4 -> inativarCarroPorId(carService, sc);
+                case 5 -> ativarCarroPorId(carService, sc);
+                case 6 -> mostrarTodosCarrosDisponiveis(carService);
+                case 7 -> keepLooping = false;
+                default -> System.out.println("%d não é uma opcao valida".formatted(menuOption));
+            }
+        }
+    }
+
+    private  static void printMenu() {
+        System.out.print("""
+                1 - Adicionar carro
+                2 - Procurar carro por id
+                3 - Mostrar todos os carros
+                4 - Inativar carro por id
+                5 - Ativar carro por id
+                6 - Mostrar todos carros disponíveis
+                7 - Sair
+                ->\s""");
+    }
+
+    private static void adicionarCarro(CarService carService, Scanner sc) {
         try {
-            applicationContext.getCarService().insert(car1);
+            printCarros();
+            int option = sc.nextInt();
+
+            switch (option) {
+                case 1 -> System.out.println(carService.insert(exemploSemBuilderComTodosOsParametros()));
+                case 2 -> System.out.println(carService.insert(exemploSemBuilderComParametrosNecessarios()));
+                case 3 -> System.out.println(carService.insert(exemploComBuilderComTodosParametros()));
+                case 4 -> System.out.println(carService.insert(exemploComBuilderComParametrosNecessarios()));
+                default -> System.out.println("%d nao e uma opcao valida".formatted(option));
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("Formato do input invalido");
+            sc.nextLine();
+        }
+    }
+
+    private static void printCarros() {
+        System.out.println("""
+                1) Adicionar carro exemplo 1
+                2) Adicionar carro exemplo 2
+                3) Adicionar carro exemplo 3
+                4) Adicionar carro exemplo 4
+                ->\s""");
+    }
+
+    private static void procurarCarroPorId(CarService carService, Scanner sc) {
+        try {
+            System.out.print("id -> ");
+            Long id =  sc.nextLong();
+            Car car = carService.getById(id);
+
+            System.out.println(car);
+        } catch (CarNotFoundException e) {
+            System.out.println(e.getMessage());
+        } catch (InputMismatchException e) {
+            System.out.println("Formato do input invalido");
+            sc.nextLine();
+        }
+    }
+
+    private static void mostrarTodosCarros(CarService carService) {
+        carService.getAll().forEach(System.out::println);
+    }
+
+    private static void inativarCarroPorId(CarService carService, Scanner sc) {
+        try {
+            System.out.print("id -> ");
+            Long id =  sc.nextLong();
+            System.out.println(carService.deactivate(id));
         } catch (BusinessException e) {
             System.out.println(e.getMessage());
+        } catch (InputMismatchException e) {
+            System.out.println("Formato do input invalido");
+            sc.nextLine();
         }
+    }
 
-        System.out.println(applicationContext.getCarService().getById(car1.getId()));;
+    private static void ativarCarroPorId(CarService carService, Scanner sc) {
+        try {
+            System.out.print("id -> ");
+            Long id =  sc.nextLong();
+            System.out.println(carService.activate(id));
+        } catch (BusinessException e) {
+            System.out.println(e.getMessage());
+        } catch (InputMismatchException e) {
+            System.out.println("Formato do input invalido");
+            sc.nextLine();
+        }
+    }
+
+    private static void mostrarTodosCarrosDisponiveis(CarService carService) {
+        carService.getAvailableCars().forEach(System.out::println);
     }
 
     private static Car exemploSemBuilderComTodosOsParametros() {

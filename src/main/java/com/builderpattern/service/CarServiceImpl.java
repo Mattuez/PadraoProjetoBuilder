@@ -58,5 +58,29 @@ public class CarServiceImpl implements CarService {
         }
     }
 
+    @Override
+    public Car activate(Long carId) {
+        Car car = getById(carId);
 
+        if (car.isAvailable()) {
+            throw new BusinessException("Carro com id %d já esta ativado".formatted(carId));
+        }
+
+        car.setAvailable(true);
+
+        return car;
+    }
+
+    @Override
+    public Car deactivate(Long carId) {
+        Car car = getById(carId);
+
+        if (!car.isAvailable()) {
+            throw new BusinessException("Carro com id %d já esta desativado".formatted(carId));
+        }
+
+        car.setAvailable(false);
+
+        return car;
+    }
 }

@@ -6,6 +6,6 @@ public class CarNotFoundException extends EntityNotFoundException{
     }
 
     public CarNotFoundException(Long carId) {
-        this("Car with id %d doesn't exist".formatted(carId));
+        this("carro com id %d não existe".formatted(carId));
     }
 }
